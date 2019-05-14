@@ -1,12 +1,13 @@
 const evaluate = exp => Function(`"use strict";return (${exp})`)();
 
 export const Expression = props => {
-  if (props.length) {
-    const last = props.trim().slice(-1);
-    if (isNaN(Number(last))) {
-      let newExpression = props.trim().substring(0, props.length - 1);
-      return evaluate(newExpression);
+  let expArr = [...props];
+  if (expArr.length > 0) {
+    if (isNaN(Number(expArr.slice(-1)))) {
+      expArr.pop();
     }
-    return evaluate(props);
+    let newExpression = expArr.join("");
+    console.log(newExpression);
+    return evaluate(newExpression);
   }
 };

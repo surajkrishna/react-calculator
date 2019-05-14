@@ -3,9 +3,10 @@ import { Expression } from "./components/EvaluateExpression";
 import "./App.css";
 
 function App() {
-  let [operation, setOperation] = useState("");
+  let [operation, setOperation] = useState([]);
   let [typed, setTyped] = useState("0");
   let [evaluatedExp, setEvaluatedExp] = useState("");
+  let [calCache, setCalCache] = useState({});
 
   const numberInput = num => {
     setEvaluatedExp("");
@@ -14,11 +15,15 @@ function App() {
   };
 
   const numberOperation = operator => {
-    let isOperator = operation.substr(operation.length - 1);
-    if (isNaN(Number(isOperator))) {
-      operation = operation.trim().substring(0, operation.length - 1);
+    if (typed) {
+      operation.push(typed);
     }
-    operation += typed + operator;
+    const lastItem = operation[operation.length - 1] || "";
+    const isOperator = !!isNaN(Number(lastItem));
+    if (isOperator) {
+      operation.pop();
+    }
+    operation.push(operator);
     setOperation(operation);
     const evalExp = Expression(operation);
     setEvaluatedExp((evaluatedExp = evalExp));
@@ -36,21 +41,42 @@ function App() {
     setTyped(typed);
   };
 
+  const addDot = () => {
+    if (typed.indexOf(".") === -1) {
+      typed = typed.concat(".");
+      setTyped(typed);
+    }
+  };
+
+  const getResult = () => {
+    if (typed) {
+      operation.push(typed);
+    }
+    const evalExp = Expression(operation);
+    setEvaluatedExp((evaluatedExp = evalExp));
+    setTyped("");
+  };
+
+  const toggleSign = () => {
+    typed = Math.sign(typed) === -1 ? Math.abs(typed) : " ".concat(typed * -1);
+    setTyped(typed);
+  };
+
   return (
     <div className="calc-container">
       <div className="calc-body">
         <div className="calc-operation">{operation}</div>
         <div className="calc-typed">{evaluatedExp || typed}</div>
+        <div className="button c" onClick={() => clearTyped()}>
+          CE
+        </div>
         <div
           className="button c"
           onClick={() => {
             clearTyped();
-            setOperation();
+            setOperation([]);
           }}
         >
-          CE
-        </div>
-        <div className="button c" onClick={() => setOperation("")}>
           C
         </div>
         <div className="button c" onClick={() => backSpace()}>
@@ -98,7 +124,7 @@ function App() {
         <div
           className="button c"
           onClick={() => {
-            numberInput("0");
+            toggleSign();
           }}
         >
           &plusmn;
@@ -106,8 +132,12 @@ function App() {
         <div className="button" onClick={() => numberInput("0")}>
           0
         </div>
-        <div className="button c">&sdot;</div>
-        <div className="button c">&#61;</div>
+        <div className="button c" onClick={() => addDot()}>
+          &sdot;
+        </div>
+        <div className="button c" onClick={() => getResult()}>
+          &#61;
+        </div>
       </div>
     </div>
   );
